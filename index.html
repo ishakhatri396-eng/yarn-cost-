@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yarn Cost Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px 15px;
+            font-family: Arial, sans-serif;
+            background: #f2f7fa;
+            color: #183047;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 28px rgba(20, 50, 70, 0.10);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header .icon {
+            font-size: 42px;
+        }
+
+        h1 {
+            color: #153c5a;
+            margin: 10px 0;
+        }
+
+        .header p {
+            color: #637786;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 18px 0 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccd8e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            color: #183047;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #188f91;
+            border-color: #188f91;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #718392;
+            margin-top: 6px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .calculate {
+            background: #176b87;
+            color: white;
+        }
+
+        .calculate:hover {
+            background: #10516a;
+        }
+
+        .reset {
+            background: #e7eef2;
+            color: #183047;
+        }
+
+        .reset:hover {
+            background: #d7e2e8;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            margin-top: 18px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .error {
+            display: block;
+            background: #fff0f0;
+            color: #a52323;
+        }
+
+        .result {
+            display: none;
+            margin-top: 25px;
+            border-top: 2px solid #dce9ee;
+            padding-top: 22px;
+        }
+
+        .result h2 {
+            color: #176b87;
+            font-size: 21px;
+        }
+
+        .total-box {
+            background: #e8f6f4;
+            border: 1px solid #b7e4dc;
+            padding: 22px 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 18px 0;
+        }
+
+        .total-box p {
+            margin: 0 0 10px;
+            color: #35645e;
+        }
+
+        .total {
+            font-size: clamp(24px, 6vw, 34px);
+            font-weight: bold;
+            color: #087f70;
+            overflow-wrap: anywhere;
+        }
+
+        .details {
+            background: #f6f9fb;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e9ee;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row span:last-child {
+            text-align: right;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .formula {
+            margin-top: 18px;
+            padding: 15px;
+            background: #eef5fa;
+            border-radius: 8px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        footer {
+            text-align: center;
+            color: #758794;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 450px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header class="header">
+            <div class="icon" aria-hidden="true">🧵</div>
+            <h1>Yarn Cost Calculator</h1>
+            <p>Calculate yarn expenses easily and accurately.</p>
+        </header>
+
+        <form id="yarnForm">
+            <label for="quantity">Yarn Quantity</label>
+            <input
+                type="number"
+                id="quantity"
+                placeholder="e.g. 250"
+                min="0"
+                step="any"
+                required
+            >
+
+            <label for="unit">Quantity Unit</label>
+            <select id="unit">
+                <option value="kg">Kilograms (kg)</option>
+                <option value="g">Grams (g)</option>
+                <option value="tonne">Metric Tons (tonnes)</option>
+            </select>
+
+            <label for="price">Price per Kilogram (PKR)</label>
+            <input
+                type="number"
+                id="price"
+                placeholder="e.g. 850"
+                min="0"
+                step="any"
+                required
+            >
+
+            <label for="wastage">Yarn Wastage (%) — Optional</label>
+            <input
+                type="number"
+                id="wastage"
+                placeholder="e.g. 5"
+                min="0"
+                max="100"
+                step="any"
+            >
+            <p class="hint">
+                Enter 0 or leave blank if there is no wastage.
+            </p>
+
+            <div class="buttons">
+                <button type="submit" class="calculate">
+                    Calculate Cost
+                </button>
+                <button type="reset" class="reset">
+                    Reset
+                </button>
+            </div>
+        </form>
+
+        <div id="message" class="message" role="alert"></div>
+
+        <section id="result" class="result" aria-live="polite">
+            <h2>Calculation Results</h2>
+
+            <div class="total-box">
+                <p>Total Yarn Cost</p>
+                <div id="totalCost" class="total">PKR 0</div>
+            </div>
+
+            <div class="details">
+                <div class="detail-row">
+                    <span>Entered Quantity</span>
+                    <span id="enteredQuantity"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Quantity in Kilograms</span>
+                    <span id="convertedQuantity"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Wastage Quantity</span>
+                    <span id="wastageQuantity"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Quantity Including Wastage</span>
+                    <span id="adjustedQuantity"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Price per Kilogram</span>
+                    <span id="priceResult"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Base Yarn Cost</span>
+                    <span id="baseCost"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Additional Wastage Cost</span>
+                    <span id="extraCost"></span>
+                </div>
+            </div>
+
+            <div class="formula">
+                <strong>Formula:</strong><br>
+                Quantity (kg) = Entered quantity × Unit conversion<br>
+                Wastage (kg) = Quantity (kg) × Wastage % ÷ 100<br>
+                Total Cost = Adjusted quantity (kg) × Price per kg<br>
+                <br>
+                <strong>Calculation:</strong>
+                <p id="calculationSteps"></p>
+            </div>
+        </section>
+
+        <footer>
+            YarnCalc | Textile Engineering Tools
+        </footer>
+    </main>
+
+    <script>
+        const form = document.getElementById("yarnForm");
+        const message = document.getElementById("message");
+        const result = document.getElementById("result");
+
+        const money = (value) =>
+            "PKR " + value.toLocaleString("en-PK", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        const number = (value) =>
+            value.toLocaleString("en-PK", {
+                maximumFractionDigits: 6
+            });
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            message.className = "message";
+            message.textContent = "";
+            result.style.display = "none";
+
+            const quantity = Number(
+                document.getElementById("quantity").value
+            );
+
+            const unit = document.getElementById("unit").value;
+
+            const price = Number(
+                document.getElementById("price").value
+            );
+
+            const wastageInput =
+                document.getElementById("wastage").value.trim();
+
+            const wastage = wastageInput === ""
+                ? 0
+                : Number(wastageInput);
+
+            if (
+                document.getElementById("quantity").value.trim() === "" ||
+                document.getElementById("price").value.trim() === ""
+            ) {
+                showError("Please enter both yarn quantity and price.");
+                return;
+            }
+
+            if (
+                !Number.isFinite(quantity) ||
+                !Number.isFinite(price) ||
+                !Number.isFinite(wastage) ||
+                quantity <= 0 ||
+                price < 0 ||
+                wastage < 0 ||
+                wastage > 100
+            ) {
+                showError(
+                    "Enter a quantity greater than zero, a non-negative price, and wastage between 0% and 100%."
+                );
+                return;
+            }
+
+            let quantityKg;
+            let enteredUnit;
+
+            if (unit === "g") {
+                quantityKg = quantity / 1000;
+                enteredUnit = "g";
+            } else if (unit === "tonne") {
+                quantityKg = quantity * 1000;
+                enteredUnit = "tonnes";
+            } else {
+                quantityKg = quantity;
+                enteredUnit = "kg";
+            }
+
+            const wastageKg = quantityKg * wastage / 100;
+            const adjustedKg = quantityKg + wastageKg;
+
+            const baseCost = quantityKg * price;
+            const extraCost = wastageKg * price;
+            const totalCost = adjustedKg * price;
+
+            if (
+                ![
+                    quantityKg, wastageKg, adjustedKg,
+                    baseCost, extraCost, totalCost
+                ].every(Number.isFinite)
+            ) {
+                showError("The values are too large to calculate.");
+                return;
+            }
+
+            document.getElementById("enteredQuantity").textContent =
+                number(quantity) + " " + enteredUnit;
+
+            document.getElementById("convertedQuantity").textContent =
+                number(quantityKg) + " kg";
+
+            document.getElementById("wastageQuantity").textContent =
+                number(wastageKg) + " kg";
+
+            document.getElementById("adjustedQuantity").textContent =
+                number(adjustedKg) + " kg";
+
+            document.getElementById("priceResult").textContent =
+                money(price) + " / kg";
+
+            document.getElementById("baseCost").textContent =
+                money(baseCost);
+
+            document.getElementById("extraCost").textContent =
+                money(extraCost);
+
+            document.getElementById("totalCost").textContent =
+                money(totalCost);
+
+            document.getElementById("calculationSteps").textContent =
+                number(quantityKg) + " kg × " + money(price) +
+                " = " + money(baseCost) +
+                ". Wastage: " + number(wastageKg) +
+                " kg (" + wastage + "%), costing " +
+                money(extraCost) +
+                ". Final quantity: " + number(adjustedKg) +
+                " kg. Total cost: " + money(totalCost) + ".";
+
+            result.style.display = "block";
+        });
+
+        function showError(text) {
+            message.textContent = text;
+            message.className = "message error";
+        }
+
+        form.addEventListener("reset", function () {
+            message.className = "message";
+            message.textContent = "";
+            result.style.display = "none";
+        });
+    </script>
+</body>
+</html>
